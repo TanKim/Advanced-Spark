@@ -9,6 +9,8 @@ import org.apache.log4j.{Level, Logger}
 
 object Application {
   def main(args: Array[String]): Unit = {
+    System.setProperty("hadoop.home.dir", "C:/winutil/")
+
     val appName = "advanced-spark-application"
     val conf = new SparkConf().setAppName(appName).setMaster("local[*]")
     val sc = new SparkContext(conf)
