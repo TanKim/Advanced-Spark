@@ -1,14 +1,44 @@
+package chapter3
+
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.ml.recommendation.{ALS, ALSModel}
+import org.apache.spark.sql.{Dataset, SparkSession, _}
+import org.apache.spark.sql.functions._
+
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.ml.recommendation.{ALS, ALSModel}
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
-import org.apache.spark.sql.functions._
 
 /**
-  * Created by tkim0 on 2017-01-14.
+  * Created by tkim0 on 2017-01-18.
   */
+object RunRecommender_2nd {
+
+  def run(): Unit = {
+
+    val appName = "chapter3.Recommander"
+    val conf = new SparkConf().setAppName(appName).setMaster("local[*]")
+    val sc = new SparkContext(conf)
+    val rootLogger = Logger.getRootLogger
+    rootLogger.setLevel(Level.ERROR)
+
+    val spark = SparkSession.builder().getOrCreate()
+    val base = "C:/dev/data/chapter3/"
+    val rawUserArtistData = spark.read.textFile(base + "user_artist_data.txt")
+    val rawArtistData = spark.read.textFile(base + "artist_data.txt")
+    val rawArtistAlias = spark.read.textFile(base + "artist_alias.txt")
+
+    val runRecommender = new RunRecommender(spark)
+    runRecommender.preparation(rawUserArtistData, rawArtistData, rawArtistAlias)
+    runRecommender.model(rawUserArtistData, rawArtistData, rawArtistAlias)
+    runRecommender.evaluate(rawUserArtistData, rawArtistAlias)
+    runRecommender.recommend(rawUserArtistData, rawArtistData, rawArtistAlias)
+  }
+
+}
+
 class RunRecommender(private val spark: SparkSession) {
 
   import spark.implicits._
@@ -17,7 +47,6 @@ class RunRecommender(private val spark: SparkSession) {
                    rawUserArtistData: Dataset[String],
                    rawArtistData: Dataset[String],
                    rawArtistAlias: Dataset[String]): Unit = {
-
     val userArtistDF = rawUserArtistData.map { line =>
       val Array(user, artist, _*) = line.split(' ')
       (user.toInt, artist.toInt)
@@ -101,6 +130,7 @@ class RunRecommender(private val spark: SparkSession) {
            regParam <- Seq(1.0, 0.0001);
            alpha <- Seq(1.0, 40.0))
         yield {
+          println(rank, regParam, alpha)
           val model = new ALS().
             setSeed(Random.nextLong()).
             setImplicitPrefs(true).

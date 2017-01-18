@@ -1,7 +1,4 @@
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
-import org.apache.log4j.{Level, Logger}
+import chapter3.{RunRecommender_1st, RunRecommender_2nd}
 
 /**
   * Created by tkim0 on 2017-01-14.
@@ -10,28 +7,8 @@ import org.apache.log4j.{Level, Logger}
 object Application {
   def main(args: Array[String]): Unit = {
     System.setProperty("hadoop.home.dir", "C:/winutil/")
-
-    val appName = "advanced-spark-application"
-    val conf = new SparkConf().setAppName(appName).setMaster("local[*]")
-    val sc = new SparkContext(conf)
-    val rootLogger = Logger.getRootLogger
-    rootLogger.setLevel(Level.ERROR)
-
-    val spark = SparkSession.builder().getOrCreate()
-
-    def getCurrentDirectory = new java.io.File(".").getCanonicalPath
-    val dirName = getCurrentDirectory
-    println(dirName)
-    val base = "C:/dev/data/profiledata_06-May-2005/"
-
-    val rawUserArtistData = spark.read.textFile(base + "user_artist_data.txt")
-    val rawArtistData = spark.read.textFile(base + "artist_data.txt")
-    val rawArtistAlias = spark.read.textFile(base + "artist_alias.txt")
-
-    val runRecommender = new RunRecommender(spark)
-    runRecommender.preparation(rawUserArtistData, rawArtistData, rawArtistAlias)
-    runRecommender.model(rawUserArtistData, rawArtistData, rawArtistAlias)
-    runRecommender.evaluate(rawUserArtistData, rawArtistAlias)
-    runRecommender.recommend(rawUserArtistData, rawArtistData, rawArtistAlias)
+    RunRecommender_1st.run()
+    //RunRecommender_2nd.run()
+    //RunRDF_1st.run()
   }
 }
