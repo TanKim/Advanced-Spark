@@ -40,10 +40,10 @@ object RunRDF_1st {
     cvData.cache()
     testData.cache()
 
-    simpleDecisionTree(trainData, cvData)
-    randomClassifier(trainData, cvData)
-    evaluate(trainData, cvData, testData)
-    evaluateCategorical(rawData)
+    //simpleDecisionTree(trainData, cvData)
+    //randomClassifier(trainData, cvData)
+    //evaluate(trainData, cvData, testData)
+    //evaluateCategorical(rawData)
     evaluateForest(rawData)
 
     trainData.unpersist()
